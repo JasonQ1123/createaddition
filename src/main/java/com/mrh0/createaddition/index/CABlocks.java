@@ -11,6 +11,7 @@ import com.mrh0.createaddition.blocks.cake.CACakeBlock;
 import com.mrh0.createaddition.blocks.connector.LargeConnectorBlock;
 import com.mrh0.createaddition.blocks.connector.SmallConnectorBlock;
 import com.mrh0.createaddition.blocks.connector.SmallLightConnectorBlock;
+import com.mrh0.createaddition.blocks.connector.SuperconductingConnectorBlock;
 import com.mrh0.createaddition.blocks.crops.HarmfulPlantBlock;
 import com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterBlock;
 import com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterDisplaySource;
@@ -105,6 +106,12 @@ public class CABlocks {
 			.transform(customItemModel())
 			.register();
 
+	public static final BlockEntry<SuperconductingConnectorBlock> SUPERCONDUCTING_CONNECTOR = CreateAddition.REGISTRATE.block("superconducting_connector",  SuperconductingConnectorBlock::new)
+			.initialProperties(SharedProperties::softMetal)
+			.onRegister(movementBehaviour(new NodeMovementBehaviour()))
+			.item()
+			.transform(customItemModel())
+			.register();
 	/*public static final BlockEntry<AccumulatorBlock> ACCUMULATOR = CreateAddition.REGISTRATE.block("accumulator",  AccumulatorBlock::new)
 			.initialProperties(SharedProperties::softMetal)
 			.onRegister(AllMovementBehaviours.movementBehaviour(new NodeMovementBehaviour()))

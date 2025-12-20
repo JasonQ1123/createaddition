@@ -4,6 +4,7 @@ import com.mrh0.createaddition.blocks.alternator.AlternatorBlockEntity;
 import com.mrh0.createaddition.blocks.connector.LargeConnectorBlockEntity;
 import com.mrh0.createaddition.blocks.connector.SmallConnectorBlockEntity;
 import com.mrh0.createaddition.blocks.connector.SmallLightConnectorBlockEntity;
+import com.mrh0.createaddition.blocks.connector.SuperconductingConnectorBlockEntity;
 import com.mrh0.createaddition.blocks.connector.base.ConnectorRenderer;
 import com.mrh0.createaddition.blocks.creative_energy.CreativeEnergyBlockEntity;
 import com.mrh0.createaddition.blocks.digital_adapter.DigitalAdapterBlockEntity;
@@ -69,7 +70,13 @@ public class CABlockEntities {
 			.validBlocks(CABlocks.LARGE_CONNECTOR)
 			.renderer(() -> ConnectorRenderer::new)
 			.register();
-	
+
+	public static final BlockEntityEntry<SuperconductingConnectorBlockEntity> SUPERCONDUCTING_CONNECTOR = CreateAddition.REGISTRATE
+			.blockEntity("superconducting_connector", SuperconductingConnectorBlockEntity::new)
+			.validBlocks(CABlocks.SUPERCONDUCTING_CONNECTOR)
+			.renderer(() -> ConnectorRenderer::new)
+			.register();
+
 	public static final BlockEntityEntry<RedstoneRelayBlockEntity> REDSTONE_RELAY = CreateAddition.REGISTRATE
 			.blockEntity("redstone_relay", RedstoneRelayBlockEntity::new)
 			.validBlocks(CABlocks.REDSTONE_RELAY)

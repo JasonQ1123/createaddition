@@ -146,6 +146,7 @@
 	"statusbar.createaddition.wire.no_connection": "Wire not connected here",
 	"statusbar.createaddition.wire.invalid": "Invalid connection",
 	"statusbar.createaddition.wire.requires_high_current": "This connection requires a high current wire",
+	"statusbar.createaddition.wire.requires_superconducting": "This connection requires a superconducting wire",
 
 	"block.createaddition.electric_motor": "Electric Motor",
 

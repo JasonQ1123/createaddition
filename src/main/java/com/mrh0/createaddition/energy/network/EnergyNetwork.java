@@ -2,7 +2,6 @@ package com.mrh0.createaddition.energy.network;
 
 import java.util.Map;
 
-import com.mrh0.createaddition.config.Config;
 import com.mrh0.createaddition.energy.IWireNode;
 
 import net.minecraft.core.BlockPos;
@@ -23,9 +22,17 @@ public class EnergyNetwork {
 	private int pushed = 0;
 
 	private int nodeCount = 0;
-	
-	private static final int MAX_BUFF = 80000;
-	
+
+	private static final int MAX_BUFF = 2147483647;
+
+	private int saturatedAdd(int a, int b) {
+		long result = (long) a + (long) b;
+		if (result > Integer.MAX_VALUE) return Integer.MAX_VALUE;
+		if (result < Integer.MIN_VALUE) return Integer.MIN_VALUE;
+		return (int) result;
+	}
+
+
 	public EnergyNetwork(Level world) {
 		this.inBuff = 0;
 		this.outBuff = 0;
@@ -38,7 +45,10 @@ public class EnergyNetwork {
 	}
 
 	public int getMaxBuff() {
-		return Math.min(nodeCount * (outDemand + inDemand * 2 + 10), MAX_BUFF);
+		long calculated = (long) nodeCount * ((long) outDemand + (long) inDemand * 2L + 10L);
+		if (calculated <= 0) return 0;
+		if (calculated > MAX_BUFF) return MAX_BUFF;
+		return (int) calculated;
 	}
 	
 	public void tick(int index) {
@@ -60,13 +70,19 @@ public class EnergyNetwork {
 
 	// Returns the amount of energy pushed to network
 	public int push(int energy, boolean simulate) {
-		energy = Math.min(getMaxBuff() - inBuff, energy);
-		energy = Math.max(energy, 0);
+		long remaining = (long) getMaxBuff() - (long) inBuff;
+		if (remaining <= 0) return 0;
+		int actual = (int) Math.min((long) energy, remaining);
 		if (!simulate) {
-			inBuff += energy;
-			pushed += energy;
+			long newInBuff = (long) inBuff + (long) actual;
+			if (newInBuff > MAX_BUFF) {
+				actual = MAX_BUFF - inBuff;
+				newInBuff = MAX_BUFF;
+			}
+			inBuff = (int) newInBuff;
+			pushed = saturatedAdd(pushed, actual);
 		}
-		return energy;
+		return actual;
 	}
 
 	public int push(int energy) {
@@ -74,7 +90,7 @@ public class EnergyNetwork {
 	}
 	
 	public int demand(int demand) {
-		this.inDemand += demand;
+		this.inDemand = saturatedAdd(this.inDemand, demand);
 		return demand;
 	}
 	
@@ -92,12 +108,13 @@ public class EnergyNetwork {
 
 	// Returns amount of energy pulled from network
 	public int pull(int energy, boolean simulate) {
-		int r = Math.max(Math.min(energy, outBuff), 0);
+		if (outBuff <= 0) return 0;
+		int actual = Math.min(energy, outBuff);
 		if (!simulate) {
-			outBuff -= r;
-			pulled += r;
+			outBuff = Math.max(outBuff - actual, 0);
+			pulled = saturatedAdd(pulled, actual);
 		}
-		return r;
+		return actual;
 	}
 
 	public int pull(int max) {

@@ -58,6 +58,8 @@ public class CAItems {
 			CreateAddition.REGISTRATE.item("copper_wire", Item::new).register();
 	public static final ItemEntry<Item> IRON_WIRE =
 			CreateAddition.REGISTRATE.item("iron_wire", Item::new).register();
+	public static final ItemEntry<Item> SUPERCONDUCTING_WIRE =
+			CreateAddition.REGISTRATE.item("superconducting_wire", Item::new).register();
 	public static final ItemEntry<Item> GOLD_WIRE =
 			CreateAddition.REGISTRATE.item("gold_wire", Item::new).register();
 	public static final ItemEntry<Item> ELECTRUM_WIRE =
@@ -67,8 +69,8 @@ public class CAItems {
 			CreateAddition.REGISTRATE.item("spool", WireSpool::new).register();
 	public static final ItemEntry<WireSpool> COPPER_SPOOL =
 			CreateAddition.REGISTRATE.item("copper_spool", WireSpool::new).register();
-	//public static final ItemEntry<WireSpool> IRON_SPOOL =
-	//		CreateAddition.REGISTRATE.item("iron_spool", WireSpool::new).register();
+	public static final ItemEntry<WireSpool> SUPERCONDUCTING_SPOOL =
+			CreateAddition.REGISTRATE.item("superconducting_spool", WireSpool::new).register();
 	public static final ItemEntry<WireSpool> GOLD_SPOOL =
 			CreateAddition.REGISTRATE.item("gold_spool", WireSpool::new).register();
 	public static final ItemEntry<WireSpool> ELECTRUM_SPOOL =

@@ -20,6 +20,7 @@ public enum WireConnectResult {
 	EXISTS(Component.translatable("statusbar.createaddition.wire.exists").withStyle(ChatFormatting.RED)),
 	NO_CONNECTION(Component.translatable("statusbar.createaddition.wire.no_connection").withStyle(ChatFormatting.RED)),
 	INVALID(Component.translatable("statusbar.createaddition.wire.invalid").withStyle(ChatFormatting.RED)),
+	REQUIRES_SUPERCONDUCTING(Component.translatable("statusbar.createaddition.wire.requires_superconducting").withStyle(ChatFormatting.RED)),
 	REQUIRES_HIGH_CURRENT(Component.translatable("statusbar.createaddition.wire.requires_high_current").withStyle(ChatFormatting.RED));
 
 	private final Component message;
