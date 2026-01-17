@@ -36,6 +36,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -48,10 +49,11 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 
 public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IHaveGoggleInformation, IObserveTileEntity {
@@ -64,6 +66,15 @@ public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IH
 	protected boolean isCreative;
 	protected boolean goggles;
 	protected boolean hat;
+
+	// Custom fluid handling
+	protected LazyOptional<IFluidHandler> fluidCapability;
+	protected FluidTank tankInventory;
+
+	private Optional<LiquidBurningRecipe> recipeCache = Optional.empty();
+	private Fluid lastFluid = null;
+
+	public boolean firstTick = true;
 
 	public LiquidBlazeBurnerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
@@ -86,32 +97,20 @@ public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IH
 
 	}
 
-	// Custom fluid handling
-	protected LazyOptional<IFluidHandler> fluidCapability;
-	protected FluidTank tankInventory;
-
-	private Optional<LiquidBurningRecipe> recipeCache = Optional.empty();
-	private Fluid lastFluid = null;
-	private int updateTimeout = 10;
-	private boolean changed = true;
-
 	protected SmartFluidTank createInventory() {
-		return new SmartFluidTank(4000, this::onFluidStackChanged);
-	}
-
-	protected void onFluidStackChanged(FluidStack newFluidStack) {
-		if (!hasLevel())
-			return;
-		update(newFluidStack);
+		SmartFluidTank fluidTank = new SmartFluidTank(4000, this::update);
+		fluidTank.setValidator(stack -> find(stack, level).isPresent());
+		return fluidTank;
 	}
 
 	private void update(FluidStack stack) {
+		if (!hasLevel())
+			return;
 		if(level.isClientSide())
 			return;
 		if(stack.getFluid() != lastFluid)
 			recipeCache = find(stack, level);
 		lastFluid = stack.getFluid();
-		changed = true;
 	}
 
 	public Optional<LiquidBurningRecipe> find(FluidStack stack, Level level) {
@@ -130,31 +129,24 @@ public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IH
 			return fluidCapability.cast();
 		return super.getCapability(cap, side);
 	}
-
-	public boolean first = true;
+	
 	public void burningTick() {
 		if(level.isClientSide())
 			return;
 
-		if(first)
+		if(firstTick)
 			update(tankInventory.getFluid());
-		first = false;
-
-		if(remainingBurnTime < 1)
+		firstTick = false;
+		
 
 		if(recipeCache.isEmpty()) return;
 
 		if(tankInventory.getFluidAmount() < 100) return;
 		if(remainingBurnTime > MAX_HEAT_CAPACITY) return;
-
-		// Added try catch because this crashes for some reason for a minority of players, very strange.
-		try {
-			remainingBurnTime += recipeCache.get().getBurnTime() / 10;
-			activeFuel = recipeCache.get().isSuperheated() ? FuelType.SPECIAL : FuelType.NORMAL;
-		}
-		catch(Exception e) {
-			return;
-		}
+		
+		remainingBurnTime += recipeCache.get().getBurnTime() / 10;
+		activeFuel = recipeCache.get().isSuperheated() ? FuelType.SPECIAL : FuelType.NORMAL;
+		
 		tankInventory.drain(100, FluidAction.EXECUTE);
 
 		BlazeBurnerBlock.HeatLevel prev = getHeatLevelFromBlock();
@@ -273,7 +265,7 @@ public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IH
 	}
 
 	public void updateBlockState() {
-		setBlockHeat(getHeatLevelFromFuelType(activeFuel));
+		setBlockHeat(getHeatLevel());
 	}
 
 	protected void setBlockHeat(BlazeBurnerBlock.HeatLevel heat) {
@@ -284,26 +276,13 @@ public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IH
 		notifyUpdate();
 	}
 
-	private boolean tryUpdateLiquid(ItemStack itemStack, boolean simulate) {
-		LazyOptional<IFluidHandlerItem> cap = itemStack
-				.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
-		if (!cap.isPresent()) return false;
-		IFluidHandlerItem handler = cap.orElse(null);
-		if (handler.getFluidInTank(0).isEmpty()) return false;
-		FluidStack stack = handler.getFluidInTank(0);
-		Optional<LiquidBurningRecipe> recipe = find(stack, level);
-		if (!recipe.isPresent()) return false;
-
-		LazyOptional<IFluidHandler> tecap = getCapability(ForgeCapabilities.FLUID_HANDLER);
-		if (!tecap.isPresent()) return false;
-		IFluidHandler tehandler = tecap.orElse(null);
-		if (tehandler.getTankCapacity(0) - tehandler.getFluidInTank(0).getAmount() < 1000) return false;
-
-		if(!simulate) tehandler.fill(new FluidStack(handler.getFluidInTank(0).getFluid(), 1000), FluidAction.EXECUTE);
-		//if (!player.isCreative())
-		//	player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET, 1));
-		if(!simulate) level.playSound(null, getBlockPos(), SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, .125f + level.random.nextFloat() * .125f, .75f - level.random.nextFloat() * .25f);
-		return true;
+	protected FluidActionResult tryUpdateLiquid(ItemStack itemStack, @Nullable Player player, boolean simulate) {
+		FluidActionResult result = FluidUtil.tryEmptyContainerAndStow(itemStack, tankInventory, null, 1000, player, !simulate);
+		
+		if(result.isSuccess() && ! simulate) {
+			level.playSound(null, getBlockPos(), SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, .125f + level.random.nextFloat() * .125f, .75f - level.random.nextFloat() * .25f);
+		}
+		return result;
 	}
 
 	/**
@@ -316,11 +295,8 @@ public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IH
 		FuelType newFuel = FuelType.NONE;
 		int newBurnTime;
 
-		// Liquid Fluid Logic
-		if(tryUpdateLiquid(itemStack, simulate)) return true;
-
 		if (AllItemTags.BLAZE_BURNER_FUEL_SPECIAL.matches(itemStack)) {
-			newBurnTime = 1000;
+			newBurnTime = 3200;
 			newFuel = FuelType.SPECIAL;
 		} else {
 			newBurnTime = ForgeHooks.getBurnTime(itemStack, null);
@@ -394,7 +370,7 @@ public class LiquidBlazeBurnerBlockEntity extends SmartBlockEntity implements IH
 			.125f + level.random.nextFloat() * .125f, .75f - level.random.nextFloat() * .25f);
 	}
 
-	protected BlazeBurnerBlock.HeatLevel getHeatLevelFromFuelType(FuelType fuel) {
+	protected BlazeBurnerBlock.HeatLevel getHeatLevel() {
 		BlazeBurnerBlock.HeatLevel level = BlazeBurnerBlock.HeatLevel.SMOULDERING;
 		switch (activeFuel) {
 		case SPECIAL:
