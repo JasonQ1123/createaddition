@@ -53,7 +53,7 @@ public class CAArmInteractions {
         public ItemStack insert(ItemStack stack, boolean simulate) {
             ItemStack input = stack.copy();
             InteractionResultHolder<ItemStack> res =
-                    LiquidBlazeBurnerBlock.tryInsert(cachedState, level, pos, input, false, false, simulate);
+                    LiquidBlazeBurnerBlock.tryInsert(cachedState, level, pos, null, input, false, false, simulate);
             ItemStack remainder = res.getObject();
             if (input.isEmpty()) {
                 return remainder;

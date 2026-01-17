@@ -11,18 +11,15 @@ import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
-import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.foundation.block.IBE;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.NonNullList;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -41,6 +38,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.FakePlayer;
+import net.minecraftforge.fluids.FluidActionResult;
 
 public class LiquidBlazeBurnerBlock extends HorizontalDirectionalBlock implements IBE<LiquidBlazeBurnerBlockEntity>, IWrenchable {
 
@@ -118,7 +116,7 @@ public class LiquidBlazeBurnerBlock extends HorizontalDirectionalBlock implement
 		boolean forceOverflow = !(player instanceof FakePlayer);
 
 		InteractionResultHolder<ItemStack> res =
-			tryInsert(state, level, pos, heldItem, doNotConsume, forceOverflow, false);
+			tryInsert(state, level, pos, player, heldItem, doNotConsume, forceOverflow, false);
 		ItemStack leftover = res.getObject();
 		if (!level.isClientSide && !doNotConsume && !leftover.isEmpty()) {
 			if (heldItem.isEmpty()) {
@@ -133,7 +131,7 @@ public class LiquidBlazeBurnerBlock extends HorizontalDirectionalBlock implement
 	}
 
 	public static InteractionResultHolder<ItemStack> tryInsert(BlockState state, Level level, BlockPos pos,
-		ItemStack stack, boolean doNotConsume, boolean forceOverflow, boolean simulate) {
+		@Nullable Player player, ItemStack stack, boolean doNotConsume, boolean forceOverflow, boolean simulate) {
 		if (!state.hasBlockEntity())
 			return InteractionResultHolder.fail(ItemStack.EMPTY);
 
@@ -147,6 +145,19 @@ public class LiquidBlazeBurnerBlock extends HorizontalDirectionalBlock implement
 				burnerTE.applyCreativeFuel();
 			return InteractionResultHolder.success(ItemStack.EMPTY);
 		}
+
+		if (burnerTE.isCreative) {
+			return InteractionResultHolder.fail(ItemStack.EMPTY);
+		}
+
+		FluidActionResult liquidResult = burnerTE.tryUpdateLiquid(stack, player, simulate);
+		if(liquidResult.isSuccess()) {
+			if(!doNotConsume) {
+				stack.setCount(0);
+			}
+			return InteractionResultHolder.success(liquidResult.getResult());
+		}
+
 		if (!burnerTE.tryUpdateFuel(stack, forceOverflow, simulate))
 			return InteractionResultHolder.fail(ItemStack.EMPTY);
 
