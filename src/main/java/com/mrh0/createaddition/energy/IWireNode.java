@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import com.mrh0.createaddition.blocks.connector.ConnectorType;
-import com.mrh0.createaddition.config.Config;
 import com.mrh0.createaddition.energy.network.EnergyNetwork;
 import com.mrh0.createaddition.index.CAItems;
 import com.mrh0.createaddition.util.Util;
@@ -563,7 +562,9 @@ public interface IWireNode {
 		if(wn1.getConnectorType() == ConnectorType.Large && wn2.getConnectorType() == ConnectorType.Large) {
 			if(type == WireType.COPPER) return WireConnectResult.REQUIRES_HIGH_CURRENT;
 		}
-		
+		if(wn1.getConnectorType() == ConnectorType.Superconducting && wn2.getConnectorType() == ConnectorType.Superconducting) {
+			if(type != WireType.SUPERCONDUCTING) return WireConnectResult.REQUIRES_SUPERCONDUCTING;
+		}
 		wn1.setNode(node1, node2, wn2.getPos(), type);
 		wn2.setNode(node2, node1, wn1.getPos(), type);
 		return WireConnectResult.getLink(wn2.isNodeInput(node2), wn2.isNodeOutput(node2));
