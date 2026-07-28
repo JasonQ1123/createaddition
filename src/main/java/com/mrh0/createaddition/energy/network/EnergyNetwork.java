@@ -70,6 +70,7 @@ public class EnergyNetwork {
 
 	// Returns the amount of energy pushed to network
 	public int push(int energy, boolean simulate) {
+		if (energy <= 0) return 0;
 		long remaining = (long) getMaxBuff() - (long) inBuff;
 		if (remaining <= 0) return 0;
 		int actual = (int) Math.min((long) energy, remaining);
@@ -108,7 +109,7 @@ public class EnergyNetwork {
 
 	// Returns amount of energy pulled from network
 	public int pull(int energy, boolean simulate) {
-		if (outBuff <= 0) return 0;
+		if (energy <= 0 || outBuff <= 0) return 0;
 		int actual = Math.min(energy, outBuff);
 		if (!simulate) {
 			outBuff = Math.max(outBuff - actual, 0);

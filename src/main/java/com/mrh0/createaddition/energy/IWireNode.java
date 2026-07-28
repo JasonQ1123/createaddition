@@ -562,9 +562,13 @@ public interface IWireNode {
 		if(wn1.getConnectorType() == ConnectorType.Large && wn2.getConnectorType() == ConnectorType.Large) {
 			if(type == WireType.COPPER) return WireConnectResult.REQUIRES_HIGH_CURRENT;
 		}
-		if(wn1.getConnectorType() == ConnectorType.Superconducting && wn2.getConnectorType() == ConnectorType.Superconducting) {
-			if(type != WireType.SUPERCONDUCTING) return WireConnectResult.REQUIRES_SUPERCONDUCTING;
-		}
+		boolean superconducting1 = wn1.getConnectorType() == ConnectorType.Superconducting;
+		boolean superconducting2 = wn2.getConnectorType() == ConnectorType.Superconducting;
+		if (superconducting1 != superconducting2) return WireConnectResult.INVALID;
+		if (superconducting1 && type != WireType.SUPERCONDUCTING)
+			return WireConnectResult.REQUIRES_SUPERCONDUCTING;
+		if (!superconducting1 && type == WireType.SUPERCONDUCTING)
+			return WireConnectResult.INVALID;
 		wn1.setNode(node1, node2, wn2.getPos(), type);
 		wn2.setNode(node2, node1, wn1.getPos(), type);
 		return WireConnectResult.getLink(wn2.isNodeInput(node2), wn2.isNodeOutput(node2));

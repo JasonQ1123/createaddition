@@ -86,6 +86,15 @@
 	"item.createaddition.electrum_wire": "Electrum Wire",
 	"item.createaddition.electrum_rod": "Electrum Rod",
 
+	"item.createaddition.superconducting_spool": "Superconducting Spool",
+	"item.createaddition.superconducting_spool.tooltip": "SPOOL",
+	"item.createaddition.superconducting_spool.tooltip.summary": "Used to store wires.",
+	"item.createaddition.superconducting_spool.tooltip.condition1": "Superconducting Current",
+	"item.createaddition.superconducting_spool.tooltip.behaviour1": "Connects to _superconducting connectors_.",
+	"item.createaddition.superconducting_spool.tooltip.condition2": "R-Clicking two Connectors",
+	"item.createaddition.superconducting_spool.tooltip.behaviour2": "Will create a wire link between them, while retaining the _Empty Spool_.",
+	"item.createaddition.superconducting_wire": "Superconducting Wire",
+
 	"item.createaddition.brass_rod": "Brass Rod",
 	"item.createaddition.bronze_rod": "Bronze Rod",
 
@@ -199,6 +208,16 @@
 	"block.createaddition.large_connector.tooltip.behaviour2": "While holding a _Gold Spool_ or _Electrum Spool_ to create a _wire link_ with up to 6 other connectors.",
 	"block.createaddition.large_connector.tooltip.condition3": "R-click with Wrench",
 	"block.createaddition.large_connector.tooltip.behaviour3": "To cycle between _Push_, _Pull_, and _None_ modes.",
+
+	"block.createaddition.superconducting_connector": "Superconducting Connector",
+	"block.createaddition.superconducting_connector.tooltip": "CONNECTOR",
+	"block.createaddition.superconducting_connector.tooltip.summary": "Connects _Forge Energy_ compatible blocks with _wires_ to transfer _⚡_.",
+	"block.createaddition.superconducting_connector.tooltip.condition1": "Superconducting Current",
+	"block.createaddition.superconducting_connector.tooltip.behaviour1": "Connected with _superconducting wires_.",
+	"block.createaddition.superconducting_connector.tooltip.condition2": "R-click",
+	"block.createaddition.superconducting_connector.tooltip.behaviour2": "While holding a _Superconducting Spool_, create a _wire link_ with up to 16 other superconducting connectors.",
+	"block.createaddition.superconducting_connector.tooltip.condition3": "R-click with Wrench",
+	"block.createaddition.superconducting_connector.tooltip.behaviour3": "To cycle between _Push_, _Pull_, and _None_ modes.",
 
 	"block.createaddition.redstone_relay": "Redstone Relay",
 	"block.createaddition.redstone_relay.tooltip": "REDSTONE_RELAY",
